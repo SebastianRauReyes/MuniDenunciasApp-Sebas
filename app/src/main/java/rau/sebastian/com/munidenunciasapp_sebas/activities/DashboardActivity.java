@@ -47,7 +47,6 @@ public class DashboardActivity extends AppCompatActivity {
         BuscarUsuario(id);
         //------------------------------------------------------------------------------------------
             user_name_textview = findViewById(R.id.user_text_dash);
-        Log.e(TAG, "onEraaaaaaaaaaaaaaaaaaaaaaror: " + user_name);
             user_name_textview.setText(user_name);
         //------------------------------------------------------------------------------------------
         DenunciasList = findViewById(R.id.recyclerview);
