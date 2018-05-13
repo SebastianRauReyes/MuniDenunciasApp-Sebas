@@ -1,6 +1,9 @@
 package rau.sebastian.com.munidenunciasapp_sebas.singletons;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import rau.sebastian.com.munidenunciasapp_sebas.interfaces.ApiService;
@@ -9,6 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiServiceGenerator {
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+
 
     private static Retrofit.Builder builder = new Retrofit.Builder()
             .baseUrl(ApiService.API_BASE_URL)

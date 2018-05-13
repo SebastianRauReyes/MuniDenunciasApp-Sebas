@@ -1,6 +1,8 @@
 package rau.sebastian.com.munidenunciasapp_sebas.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +20,9 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
+    // SharedPreferences
+    private SharedPreferences sharedPreferences;
+
     private static final String TAG = LoginActivity.class.getSimpleName();
     private EditText usernameInput;
     private EditText passwordInput;
@@ -27,13 +32,52 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
         usernameInput = findViewById(R.id.username_input);
         passwordInput = findViewById(R.id.password_input);
 
+    //---------------------------------------------------------------------------------------------
+    // SharePreference
+
+        // init SharedPreferences
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // username remember
+        String username = sharedPreferences.getString("username", null);
+        if(username != null){
+            usernameInput.setText(username);
+            passwordInput.requestFocus();
+        }
+        // islogged remember
+        if(sharedPreferences.getBoolean("islogged" , false)){
+                sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                if(sharedPreferences.getString("tipo", "99999").equals("2")){
+                    goDashboard();
+                    finish();
+                }else{
+                    goDashboardMain();
+                    finish();
+                }
+        }
+
     }
 
+    //----------------------------------------------------------------------------------------------
+    //----  Dashboard
+    private void goDashboardMain() {
+        Intent intent = new Intent(LoginActivity.this, DashboardMainActivity.class);
+        startActivity(intent);
+    }
+    //----------------------------------------------------------------------------------------------
 
+
+    //----------------------------------------------------------------------------------------------
+    //----  Dashboard
+    private void goDashboard() {
+        Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
+        startActivity(intent);
+    }
+
+    //----------------------------------------------------------------------------------------------
+    //---- User Login
     public void callLogin(View view) {
         final String username = usernameInput.getText().toString();
         String password = passwordInput.getText().toString();
@@ -44,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         ApiService service = ApiServiceGenerator.createService(ApiService.class);
-        Call<Usuario> call = null;
+        Call<Usuario> call;
         call = service.login(username, password);
 
         call.enqueue(new Callback<Usuario>() {
@@ -57,13 +101,27 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (response.isSuccessful()) {
 
-                        //ResponseMessage responseMessage = response.body();
                         Usuario usuario = response.body();
-                        Log.d(TAG, "Bienvenido " + usuario.getNombres());
-                        Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
-                        intent.putExtra("name", usuario.getNombres());
-                        startActivity(intent);
-                        finish();
+                        Toast.makeText(LoginActivity.this, "Bienvenido "+usuario.getNombres(), Toast.LENGTH_SHORT).show();
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        boolean success = editor
+                                .putString("username", usuario.getUsername())
+                                .putString("fullname" ,usuario.getNombres())
+                                .putInt("id", usuario.getId())
+                                .putString("tipo", usuario.getTipo())
+                                .putBoolean("islogged", true)
+                                .commit();
+
+                        if(usuario.getTipo().equals("2")){
+                            goDashboard();
+                            finish();
+                        }else {
+                            goDashboardMain();
+                            finish();
+                        }
+
+
 
                     } else {
                         Log.e(TAG, "onError: " + response.errorBody().string());
@@ -85,4 +143,18 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
+    //----------------------------------------------------------------------------------------------
+    //---- User Register
+
+    public void callSingUp(View view) {
+        Intent intent = new Intent(LoginActivity.this, RegisterUserActivity.class);
+        startActivity(intent);
+    }
+
+
+
+
+
+
 }
